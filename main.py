@@ -2,6 +2,7 @@ import pygame
 import time
 import math
 from utils import scale_image, blit_rotate_center, resource_path, blit_text_centre
+import sys
 
 # Initialize Font
 pygame.font.init()
@@ -186,6 +187,12 @@ class ComputerCar(AbstractCar):
         self.update_path_point()
         super().move()
 
+    def next_level(self, level):
+        self.reset()
+        self.vel = self.max_vel + (level - 1) * 0.2
+        self.current_point = 0
+
+
 
 def draw(win, images, player_car, computer_car, game_info):
     for img, pos in images:
@@ -227,10 +234,14 @@ def move_player(player_car):
         player_car.reduce_speed()
 
 
-def handle_collision(player_car, computer_car):
+def handle_collision(player_car, computer_car, game_info):
     # Computer Car Collision with finish line
     computer_finish_poi_collide = computer_car.collide(FINISH_MASK, *FINISH_POSITION)
     if computer_finish_poi_collide is not None:
+        blit_text_centre(WIN, MAIN_FONT, "You Lost!")
+        pygame.display.update()
+        pygame.time.wait(5000)
+        game_info.reset()
         player_car.reset()
         computer_car.reset()
         print("computer Wins")
@@ -245,8 +256,9 @@ def handle_collision(player_car, computer_car):
         if player_finish_poi_collide[1] == 0:
             player_car.bounce()
         else:
+            game_info.next_level()
             player_car.reset()
-            computer_car.reset()
+            computer_car.next_level(game_info.level)
             print("Finish")
 
 
@@ -254,8 +266,8 @@ def handle_collision(player_car, computer_car):
 run = True
 clock = pygame.time.Clock()
 images = [(GRASS, (0, 0)), (TRACK, (0, 0)), (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
-player_car = PlayerCar(4, 4)
-computer_car = ComputerCar(4, 4, PATH)
+player_car = PlayerCar(3, 3)
+computer_car = ComputerCar(1.9, 3, PATH)
 game_info = GameInfo()
 
 # Main game loop
@@ -284,6 +296,15 @@ while run:
 
     move_player(player_car)
     computer_car.move()
-    handle_collision(player_car, computer_car)
 
-pygame.quit()
+
+    handle_collision(player_car, computer_car, game_info)
+
+    if game_info.game_finished():
+        blit_text_centre(WIN, MAIN_FONT, "You won the game!!")
+        pygame.time.wait(5000)
+        game_info.reset()
+        player_car.reset()
+        computer_car.reset()
+
+sys.exit()

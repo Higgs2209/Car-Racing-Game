@@ -3,6 +3,7 @@ import os
 import sys
 
 # Initialize Font
+pygame.init()
 pygame.font.init()
 
 
@@ -18,6 +19,7 @@ def blit_rotate_center(win, image, top_left, angle):
 
 
 def blit_text_centre(win, font, text):
+    pygame.font.init()
     render = font.render(text, 1, (255, 255, 255))
     win.blit(render, (win.get_width()/2 - render.get_width()/2, win.get_height()/2 - render.get_height()/2))
 
